@@ -82,7 +82,12 @@ def extract_zip_flat(zip_path, extract_to):
                     continue
                 
                 # Get just the filename, ignoring the path in the zip
-                filename = os.path.basename(member.filename)
+                raw_filename = os.path.basename(member.filename)
+                try:
+                    filename = raw_filename.encode('cp437').decode('big5')
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    filename = raw_filename
+                    
                 if not filename:
                     continue
                     
