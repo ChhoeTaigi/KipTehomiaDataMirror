@@ -123,11 +123,10 @@ def extract_zip_flat(zip_path, extract_to):
                 continue
 
             filename = decode_zip_filename(member)
-            if not filename:
-                continue
-
             if filename.startswith("nan_"):
                 filename = filename[len("nan_"):]
+            if not filename:
+                continue
 
             target_path = os.path.join(extract_to, filename)
 
@@ -142,7 +141,7 @@ def extract_zip_flat(zip_path, extract_to):
 
 def load_manifest():
     if MANIFEST_FILE.exists():
-        with open(MANIFEST_FILE, 'r') as f:
+        with open(MANIFEST_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {}
 
@@ -150,7 +149,7 @@ def save_manifest(data):
     # Write to a temp file and atomically rename so a crash mid-write can't
     # leave a half-written manifest that breaks every subsequent run.
     tmp = MANIFEST_FILE.with_suffix(MANIFEST_FILE.suffix + ".tmp")
-    with open(tmp, 'w') as f:
+    with open(tmp, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     os.replace(tmp, MANIFEST_FILE)
 

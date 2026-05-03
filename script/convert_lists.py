@@ -246,8 +246,10 @@ def _attach_audio(rows, tangloo_dir):
 def _humanize_source(row):
     """Translate the internal 來源 key to a user-facing label.
 
-    Transport docs map 1:1; placename rows split by 序號 prefix. The 4 增-prefixed
-    supplements fall back to a generic label since they aren't tied to a category.
+    Transport docs map 1:1; placename rows split by 序號 prefix (A–E) or
+    fall through to 增列地名 for 增-prefixed supplements and any non-prefixed
+    IDs (the README documents 增列地名 as placename's catch-all label, so
+    we keep output inside the documented enum even if upstream schema drifts).
     """
     src = row["來源"]
     if src in SOURCE_LABELS:
@@ -258,8 +260,7 @@ def _humanize_source(row):
             label = PLACENAME_PREFIX_LABELS.get(sid[0])
             if label:
                 return label
-            if sid.startswith("增"):
-                return "增列地名"
+        return "增列地名"
     return src
 
 
