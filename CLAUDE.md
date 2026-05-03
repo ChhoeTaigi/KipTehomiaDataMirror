@@ -15,23 +15,25 @@ Licensed under CC BY 3.0 TW — the data cannot be modified (derivative works pr
 cd script && python update_data.py
 ```
 
-Dependencies: `requests`. Install with `pip install requests`.
+Dependencies: pure Python stdlib (no `pip install` needed).
 
 ## Architecture
 
 ### Data Pipeline (`script/`)
 
-1. **`update_data.py`** — Main entry point. Downloads files from language.moe.gov.tw, compares SHA256 hashes against `public/manifest.json` to detect changes, creates a timestamped version directory under `public/`, and extracts zip contents.
+1. **`update_data.py`** — Main entry point. Downloads files from language.moe.gov.tw, compares SHA256 hashes against `public/manifest.json` to detect changes, creates a timestamped version directory under `public/`, extracts audio zips into `imtong/`, and invokes `convert_lists` to build `bunji/`.
+2. **`convert_lists.py`** — Parses the 5 ODT documents inside the `*_list.zip` archives in `tangloo/`, attaches per-source audio filenames, and writes a merged `bunji/KipTehomiaData.csv` (UTF-8 with BOM) and `bunji/KipTehomiaData.json` (UTF-8, nested).
 
 ### Data Layout (`public/`)
 
 ```
 public/
   manifest.json              # Tracks latest version and file hashes
-  {YYYYMMDD-HHMM}/           # Timestamped version directory
-    list/                     # Extracted list files
-    audio_mp3/                # Extracted mp3 audio files
-    audio_wav/                # Extracted wav audio files
+  {YYYYMMDD-HHMMSS}/         # Timestamped version directory
+    bunji/                    # Merged CSV + JSON of all place names
+      KipTehomiaData.csv
+      KipTehomiaData.json
+    imtong/                   # Flat directory of all mp3 audio files
     tangloo/                  # Original downloads (zips) — gitignored
 ```
 
@@ -50,4 +52,4 @@ public/
 - **bunji** (文字) — text data
 - **imtong** (音通) — audio
 - **tangloo** (檔路) — file storage / archives
-- **tehoma** (地號名) — place names
+- **tehomia** (地號名) — place names

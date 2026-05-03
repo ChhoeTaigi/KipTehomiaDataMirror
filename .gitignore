@@ -2,3 +2,5 @@
 .venv/
 __pycache__/
 *.pyc
+public/*/tangloo/
+public/temp_update_*/

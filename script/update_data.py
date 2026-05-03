@@ -10,20 +10,22 @@ import tempfile
 import time
 from pathlib import Path
 
+from convert_lists import convert_lists
+
 # Constants
 BASE_URL = "https://language.moe.gov.tw/001/Upload/Files/site_content/M0001/mhigeonames/"
 
 FILES_TO_DOWNLOAD = [
-    "railways_list.zip", "railways_m_wav.zip", "railways_m_mp3.zip",
-    "tkmrt_list.zip", "tkmrt_m_wav.zip", "tkmrt_m_mp3.zip",
-    "thsrc_list.zip", "thsrc_m_wav.zip", "thsrc_m_mp3.zip",
-    "twtrip_list.zip", "twtrip_m_wav.zip", "twtrip_m_mp3.zip",
+    "railways_list.zip", "railways_m_mp3.zip",
+    "tkmrt_list.zip", "tkmrt_m_mp3.zip",
+    "thsrc_list.zip", "thsrc_m_mp3.zip",
+    "twtrip_list.zip", "twtrip_m_mp3.zip",
     "placename_list.zip",
-    "administrative_m_mp3.zip", "administrative_m_wav.zip",
-    "settlement_m_mp3.zip", "settlement_m_wav.zip",
-    "naturalentity_m_mp3.zip", "naturalentity_m_wav.zip",
-    "publicutilities_m_mp3.zip", "publicutilities_m_wav.zip",
-    "street_m_mp3.zip", "street_m_wav.zip"
+    "administrative_m_mp3.zip",
+    "settlement_m_mp3.zip",
+    "naturalentity_m_mp3.zip",
+    "publicutilities_m_mp3.zip",
+    "street_m_mp3.zip",
 ]
 
 DOWNLOAD_RETRIES = 3
@@ -73,6 +75,8 @@ def download_file(url, target_path):
                             done = int(50 * dl / total_length)
                             sys.stdout.write(f"\r[{'=' * done}{' ' * (50-done)}] {dl/1024/1024:.2f} MB")
                             sys.stdout.flush()
+                        if dl < total_length:
+                            raise IOError(f"truncated download: got {dl} of {total_length} bytes")
                 print() # Newline after progress bar
             return True, last_modified
         except Exception as e:
@@ -92,16 +96,21 @@ def calculate_file_hash(filepath):
     return sha256_hash.hexdigest()
 
 def decode_zip_filename(member):
-    """Decode a zip member's basename, honoring the ZIP UTF-8 (bit 11) flag."""
+    """Decode a zip member's filename, honoring the ZIP UTF-8 (bit 11) flag.
+    Always returns a single path component (no separators)."""
     raw = os.path.basename(member.filename)
     if member.flag_bits & 0x800:
         # ZIP spec says filename is UTF-8; round-tripping through cp437→cp950
         # would silently corrupt pure-ASCII names.
-        return raw
-    try:
-        return raw.encode('cp437').decode('cp950')
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        return raw
+        decoded = raw
+    else:
+        try:
+            decoded = raw.encode('cp437').decode('cp950')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            decoded = raw
+    # Re-basename: belt-and-braces against any path separator that could
+    # emerge from the decode (and against future encoding changes).
+    return os.path.basename(decoded)
 
 def extract_zip_flat(zip_path, extract_to):
     """Extracts files flat to extract_to. Raises on failure (no return value)."""
@@ -138,8 +147,12 @@ def load_manifest():
     return {}
 
 def save_manifest(data):
-    with open(MANIFEST_FILE, 'w') as f:
+    # Write to a temp file and atomically rename so a crash mid-write can't
+    # leave a half-written manifest that breaks every subsequent run.
+    tmp = MANIFEST_FILE.with_suffix(MANIFEST_FILE.suffix + ".tmp")
+    with open(tmp, 'w') as f:
         json.dump(data, f, indent=2)
+    os.replace(tmp, MANIFEST_FILE)
 
 def main():
     print("Starting update check...")
@@ -190,7 +203,7 @@ def main():
             ok, lm = download_file(url, temp_path)
             if not ok:
                 print(f"Failed to download {filename}. Aborting.")
-                return
+                sys.exit(1)
             downloaded_hashes[filename] = calculate_file_hash(temp_path)
             downloaded_last_modified[filename] = lm
 
@@ -229,34 +242,33 @@ def main():
 
             # 5. Create timestamped version directory.
             target_dir = get_timestamp_dir()
-            list_dir = target_dir / "list"
-            audio_mp3_dir = target_dir / "audio_mp3"
-            audio_wav_dir = target_dir / "audio_wav"
+            bunji_dir = target_dir / "bunji"
+            imtong_dir = target_dir / "imtong"
             tangloo_dir = target_dir / "tangloo"
 
-            list_dir.mkdir(parents=True, exist_ok=True)
-            audio_mp3_dir.mkdir(parents=True, exist_ok=True)
-            audio_wav_dir.mkdir(parents=True, exist_ok=True)
+            bunji_dir.mkdir(parents=True, exist_ok=True)
+            imtong_dir.mkdir(parents=True, exist_ok=True)
             tangloo_dir.mkdir(parents=True, exist_ok=True)
             target_dir_was_created = True
             print(f"Created version directory: {target_dir}")
 
             # 6. Move and extract. Any extraction error propagates to the
             #    except block, which removes the partial target_dir so a
-            #    future run starts clean.
+            #    future run starts clean. *_list.zip stays in tangloo/ —
+            #    convert_lists reads the embedded ODT directly from there.
             for filename in FILES_TO_DOWNLOAD:
                 temp_path = temp_dir / filename
                 tangloo_path = tangloo_dir / filename
                 shutil.move(str(temp_path), str(tangloo_path))
 
-                if filename.endswith("_list.zip"):
-                    extract_zip_flat(tangloo_path, list_dir)
-                elif filename.endswith("_mp3.zip"):
-                    extract_zip_flat(tangloo_path, audio_mp3_dir)
-                elif filename.endswith("_wav.zip"):
-                    extract_zip_flat(tangloo_path, audio_wav_dir)
+                if filename.endswith("_mp3.zip"):
+                    extract_zip_flat(tangloo_path, imtong_dir)
 
-            # 7. Manifest is written ONLY after every extraction succeeds.
+            # 7. Build merged bunji (CSV + JSON) from list ODTs in tangloo/.
+            print("Building bunji from list documents...")
+            convert_lists(tangloo_dir, bunji_dir)
+
+            # 8. Manifest is written ONLY after every extraction succeeds.
             new_manifest = {
                 "last_updated": datetime.datetime.now().isoformat(),
                 "latest_version_dir": str(target_dir.name),

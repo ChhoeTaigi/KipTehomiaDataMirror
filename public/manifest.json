@@ -1,0 +1,36 @@
+{
+  "last_updated": "2026-05-03T18:20:52.155032",
+  "latest_version_dir": "20260503-182037",
+  "files": {
+    "railways_list.zip": "ae7e1f0ed82c42ce1795b2cd304272b4efee651e2986f2bb9b7e3ff2db9dcf0a",
+    "railways_m_mp3.zip": "163510f375cfa518f69262b976c16ae8cdfe0544eedced75ded9fb5b0766194e",
+    "tkmrt_list.zip": "499261cf27af78f6f81d71364712d2f87d020daee37a82e6d0422506d9ad6509",
+    "tkmrt_m_mp3.zip": "6bbf4d0e3b9cc0ae5353dacb9a57b4bf3f89eab3032ab6eb9b1749995fa97c4f",
+    "thsrc_list.zip": "d6adbaaff5b160abbda171647978b74f1728b42f578ee6027e8a04aff83b1f52",
+    "thsrc_m_mp3.zip": "76b9fa0ea60ef069b8223534c4003c9b0b9cb84028f4a2508967bb1388195691",
+    "twtrip_list.zip": "70430697e357631f8fd400d96107a4c9994973a626b61786a71b1422781cd0e1",
+    "twtrip_m_mp3.zip": "2ee99ec038fc8bc5b50df20dc86f452bea357a971cf6d41d7161117ac783d398",
+    "placename_list.zip": "fb06c8ee6a2d03c3ef8818ad17dd7c5e03679b3212e416091428081704764ff4",
+    "administrative_m_mp3.zip": "b464239bfdfe6df09a9124279db3237df99951249e95b55a490711d0729cf9e7",
+    "settlement_m_mp3.zip": "bae9f5ea20fdc3d55a22b210f852db88b39e6810845a3e0d7ade648bf6bf845c",
+    "naturalentity_m_mp3.zip": "1e932c6fc5c48b985b78adf6d6647afcd023f562c6dc521c6fb4aceb3e28166b",
+    "publicutilities_m_mp3.zip": "bfe5080bb7416090e13803156c909aab45a381d759cd9c7155ea3541c60887d8",
+    "street_m_mp3.zip": "5b263e7414f275c8f6444a8c0a8f0782289452774089f9586e90ab0b6fa01e0e"
+  },
+  "last_modified": {
+    "railways_list.zip": "Mon, 19 Aug 2024 03:06:01 GMT",
+    "railways_m_mp3.zip": "Thu, 23 Feb 2023 03:04:46 GMT",
+    "tkmrt_list.zip": "Mon, 19 Aug 2024 03:06:02 GMT",
+    "tkmrt_m_mp3.zip": "Thu, 23 Feb 2023 03:04:49 GMT",
+    "thsrc_list.zip": "Mon, 19 Aug 2024 03:06:02 GMT",
+    "thsrc_m_mp3.zip": "Thu, 23 Feb 2023 03:04:48 GMT",
+    "twtrip_list.zip": "Mon, 19 Aug 2024 03:06:02 GMT",
+    "twtrip_m_mp3.zip": "Thu, 23 Feb 2023 03:04:51 GMT",
+    "placename_list.zip": "Mon, 31 Mar 2025 10:05:13 GMT",
+    "administrative_m_mp3.zip": "Wed, 19 Apr 2023 06:36:30 GMT",
+    "settlement_m_mp3.zip": "Wed, 19 Apr 2023 06:37:33 GMT",
+    "naturalentity_m_mp3.zip": "Wed, 19 Apr 2023 06:36:39 GMT",
+    "publicutilities_m_mp3.zip": "Wed, 19 Apr 2023 06:36:55 GMT",
+    "street_m_mp3.zip": "Wed, 19 Apr 2023 06:38:03 GMT"
+  }
+}

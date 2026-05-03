@@ -50,4 +50,4 @@ public/
 - **bunji** (文字) — text data
 - **imtong** (音通) — audio
 - **tangloo** (檔路) — file storage / archives
-- **tehoma** (地號名) — place names
+- **tehomia** (地號名) — place names
